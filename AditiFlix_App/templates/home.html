@@ -1,0 +1,35 @@
+<script type="text/javascript">
+
+    function redir(link) {
+        console.log("HI")
+        var string = "http://localhost:5000"
+        window.location=link;
+    }
+
+</script>
+
+{% extends 'layout.html' %}
+{% block content %}
+<main id="main">
+    <div class="home_title">
+        Welcome to AditiFLIX
+    </div>
+    <div class="button-flex-row">
+        <div class="button-flex-col">
+            <button class="animatebutton" onclick="redir('{{explore}}')"><span>Explore</span></button>
+        </div>
+        {% if loggedin %}
+        <div class="button-flex-col">
+            <button class="animatebutton" onclick="redir('{{logout}}')"><span>Logout</span></button>
+        </div>
+        {% else %}
+        <div class="button-flex-col">
+            <button class="animatebutton" onclick="redir('{{register}}')"><span>Register</span></button>
+        </div>
+        <div class="button-flex-col">
+            <button class="animatebutton" onclick="redir('{{login}}')"><span>Login</span></button>
+        </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

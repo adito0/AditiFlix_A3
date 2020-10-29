@@ -1,0 +1,74 @@
+<script type="text/javascript">
+    function newMovie(name, year, string) {
+        var host = window.location.origin;
+        var url = new URL(host+string);
+        var query_name = name.replace("\n","+")
+        url.searchParams.append("name", query_name);
+        url.searchParams.append("year", year);
+        window.location=url.toString();
+    }
+
+    function search(string){
+            var genreQ = ""
+            var actorQ = ""
+            var dirQ = ""
+            genreQ = document.getElementById("genreName").value
+            actorQ = document.getElementById("actorName").value
+            dirQ = document.getElementById("dirName").value
+
+            var host = window.location.origin;
+            var url = new URL(host+string);
+            url.searchParams.append("query", genreQ+"@"+actorQ+"@"+dirQ);
+            window.location=url.toString();
+        }
+
+</script>
+
+{% extends 'layout.html' %}
+{% block content %}
+<main id="main">
+    <div class="search-flex">
+        <div class="row">
+            <div class="flex-col">
+                <h1>Search</h1>
+                <p>Use ';' as a seperator. E.g. Will Smith;Tom Cruise</p>
+                <div class="flex-row">
+                    <p>Genre</p>
+                    <div class="search-container">
+                        <input type="text" id="genreName" placeholder="Search for a genre..." name="search">
+                    </div>
+                </div>
+                <div class="flex-row">
+                    <p>Actor</p>
+                    <div class="search-container">
+                        <input type="text" id="actorName" placeholder="Search for an actor..." name="search">
+                    </div>
+                </div>
+                <div class="flex-row">
+                    <p>Director</p>
+                    <div class="search-container">
+                        <input type="text" id="dirName" placeholder="Search for a director..." name="search">
+                    </div>
+                </div>
+                <div class="flex-row">
+                    <button class="nxt-btn" onclick="search('{{ url_for('movie_bp.search') }}')">Submit</button>
+                </div>
+            </div>
+            <div class="flex-col1">
+                <div class="flex-row">
+                    <h4>Showing results for <b>{{value}}</b></h4>
+                </div>
+                {% for movie in movieList %}
+                <div class="flex-item-movie">
+                    <button style="border:none; background: none;"
+                            onclick='newMovie("{{movie.title}}","{{movie.release_year}}","{{ url_for("movie_bp.browse") }}")'><img src="{{movie.image}}"
+                                                                                                class="movie-rec">
+                    </button>
+                    <p class="recs-movie-title">{{movie.title}}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

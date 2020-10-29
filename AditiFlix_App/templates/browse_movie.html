@@ -1,0 +1,108 @@
+<script type="text/javascript">
+    function newMovie(name, year, string) {
+        var host = window.location.origin;
+        var url = new URL(host+string);
+        var query_name = name.replace("\n","+")
+        url.searchParams.append("name", query_name);
+        url.searchParams.append("year", year);
+        window.location=url.toString();
+    }
+
+    function viewReview(name, year, string) {
+        var host = window.location.origin;
+        var url = new URL(host+string);
+        var query_name = name.replace("\n","+")
+        url.searchParams.append("title", query_name);
+        url.searchParams.append("year", year);
+        window.location=url.toString();
+    }
+
+    function watch(name, year, string) {
+        var host = window.location.origin;
+        var url = new URL(host+string);
+        url.searchParams.append("name", name);
+        url.searchParams.append("year", year);
+        url.searchParams.append("watched", "True");
+        alert("You just watched "+ name + "(" + year + ")")
+        window.location=url.toString();
+
+    }
+
+    function add(name, year, string) {
+        var host = window.location.origin;
+        var url = new URL(host+string);
+        url.searchParams.append("name", name);
+        url.searchParams.append("year", year);
+        url.searchParams.append("watchlisted", "True");
+        window.location=url.toString();
+    }
+
+    function rem(name, year, string) {
+        var host = window.location.origin;
+        var url = new URL(host+string);
+        url.searchParams.append("name", name);
+        url.searchParams.append("year", year);
+        url.searchParams.append("watchlisted", "False");
+        window.location=url.toString();
+    }
+</script>
+
+{% extends 'layout.html' %}
+{% block content %}
+<main id="main">
+    <div class="container movie details">
+        <div class="row">
+            <div class="col-md-6 left-box">
+                <h1>{{movie.title}} ({{movie.release_year}})</h1>
+                <p style="color:#5a7791;"><b>Runtime:</b> {{movie.runtime_minutes}} minutes &nbsp;&nbsp;&nbsp;&nbsp;<b>Director:</b> {{movie.director.director_full_name}}</p>
+                <p>{{movie.description}}</p>
+                <div class="row" style="margin-left: -15;">
+                    <div class="col">
+                        <p>Cast:</p>
+                        {% for actor in movie.actors %}
+                            <li>{{actor.actor_full_name}}</li>
+                        {% endfor %}
+                    </div>
+                    <div class="col">
+                        <p>Genres:</p>
+                        {% for genre in movie.genres %}
+                            <li>{{genre.genre_name}}</li>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="recs">
+                    <h4>Explore other movies:</h4>
+                    <div class="row">
+                        {% for movie in recs %}
+                            <div style="margin-left: 8px" class="col-sml-2">
+                                <button style="border:none; background: none;" onclick='newMovie("{{movie.title}}","{{movie.release_year}}", "{{ url_for("movie_bp.browse") }}")'><img src="{{movie.image}}" class="movie-rec"></button>
+                                <p class="recs-movie-title">{{movie.title}}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row" style="height: 600px;display:flex;justify-content: center;align-items: flex-end;">
+                    <img src={{movie.image}} class="movie-img">
+                </div>
+                <div style="display:flex;justify-content:center;">
+                    <button class="nxt-btn" onclick='viewReview("{{movie.title}}","{{movie.release_year}}", "{{ url_for("review_bp.read") }}")'>Reviews</button>
+                    {% if watched %}
+                        <button class="nxt-btn" onclick='watch("{{movie.title}}","{{movie.release_year}}", "{{ url_for("movie_bp.browse") }}")'>Watch again</button>
+                    {% else %}
+                        <button class="nxt-btn" onclick='watch("{{movie.title}}","{{movie.release_year}}", "{{ url_for("movie_bp.browse") }}")'>Watch</button>
+                    {% endif %}
+                    {% if watchlisted %}
+                        <button class="nxt-btn" onclick='rem("{{movie.title}}","{{movie.release_year}}","{{ url_for("movie_bp.browse") }}")'>- Watchlist</button>
+                    {% else %}
+                        <button class="nxt-btn" onclick='add("{{movie.title}}","{{movie.release_year}}","{{ url_for("movie_bp.browse") }}")'>+ Watchlist</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="row" class="recs">
+        </div>
+    </div>
+</main>
+{% endblock %}

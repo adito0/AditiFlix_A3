@@ -1,0 +1,78 @@
+<script type="text/javascript">
+
+    function changeSlider(string) {
+        var host = window.location.origin;
+        var url = new URL(host+string);
+        var slider = document.getElementById("myRange");
+        url.searchParams.append("year", slider.value.toString());
+        window.location=url.toString();
+    }
+
+
+    function newMovie(name, year, string) {
+        var host = window.location.origin;
+        var url = new URL(host+string);
+        var query_name = name.replace("\n","+")
+        url.searchParams.append("name", query_name);
+        url.searchParams.append("year", year);
+        console.log(url.toString());
+        window.location=url.toString();
+    }
+
+    function nextPage(year, index, string) {
+        var host = window.location.origin;
+        var url = new URL(host+string);
+        url.searchParams.append("year", year);
+        var index = parseInt(index, 10) + 8
+        url.searchParams.append("index", index);
+        window.location=url.toString();
+    }
+
+    function prevPage(year, index, string) {
+        var host = window.location.origin;
+        var url = new URL(host+string);
+        url.searchParams.append("year", year);
+        var index = parseInt(index, 10) - 8
+        url.searchParams.append("index", index);
+        window.location=url.toString();
+    }
+</script>
+
+{% extends 'layout.html' %}
+{% block content %}
+<main id="main">
+    <div style="margin-top: 100px;">
+        <h6 style="text-align:center;color:#fff;">Browse movie based on release year: <span id="demo"></span></h6>
+        <div class="row" style="color:#fff;">
+            <div class="col-sm-2" style="text-align:right;">
+                <b>1990</b>
+            </div>
+            <div class="col-sm-8" style="display: flex; flex-direction: row">
+                <div class="slidecontainer">
+                    <input type="range" min="1990" max="2020" value={{year}} class="slider" id="myRange" onchange="changeSlider('{{ url_for('movie_bp.explore') }}')">
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <b>2020</b>
+            </div>
+        </div>
+        <h2 style="text-align:center;color:#fff;padding:30px;">{{year}} Movies</h2>
+        <div class="flex-grid" style="margin-left:300px;margin-right:100px">
+            {% for movie in movieList %}
+                <div class="flex-item-movie">
+                    <button style="border:none; background: none;" onclick='newMovie("{{movie.title}}","{{movie.release_year}}", "{{ url_for("movie_bp.browse") }}")'><img src="{{movie.image}}" class="movie-rec"></button>
+                    <p class="recs-movie-title">{{movie.title}}</p>
+                </div>
+            {% endfor %}
+        </div>
+        <div style="display:flex;justify-content: center;">
+            {% if prevEnable %}
+                <button class="nxt-btn" onclick="prevPage('{{year}}','{{index}}', '{{ url_for('movie_bp.explore') }}')">Prev</button>
+            {% endif %}
+            {% if nextEnable %}
+                <button class="nxt-btn" onclick="nextPage('{{year}}','{{index}}', '{{ url_for('movie_bp.explore') }}')">Next</button>
+            {% endif %}
+        </div>
+    </div>
+</main>
+{% endblock %}

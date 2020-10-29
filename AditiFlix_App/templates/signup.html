@@ -1,0 +1,64 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h2 class="title" style="color:#fff;margin-top:100px;margin-left:50px;display:flex;justify-content:center;">
+  {% if register %}
+    Register
+  {% else %}
+    Log in
+  {% endif %}
+</h2>
+<div class="formwrapper">
+  <form method="POST" action={{redirect}}>
+    {{ form.csrf_token }}
+    <div class="form-field"><p><b>USERNAME</b></p> {{ form.username }} </div>
+    <div class="form-field"><p><b>PASSWORD</b></p> {{ form.password }}</div>
+    {% if register %}
+      <div class="form-field"><p><b>CONFIRM PASSWORD</b></p> {{ form.confirmPassword }}</div>
+      <div class="form-field">{{ form.recaptcha.label }} {{ form.recaptcha }}</div>
+    {% endif %}
+    <div style="display:flex;justify-content:center;padding:20px">
+      {{ form.submit }}
+    </div>
+    <ul class="errors" style="color:white;text-align:center;">
+      {% if error%}
+        <div style="position:relative;top:20px;">
+          {{ error }}
+        </div>
+      {% endif %}
+          {% if form.username.errors%}
+            {% for error in form.username.errors %}
+              {{ error }}
+            {% endfor %}
+          {% endif %}
+          {% if notUnique%}
+            <ul class="errors">
+              Username is not unique. Please enter another one.
+            </ul>
+          {% endif %}
+          {% if form.password.errors %}
+            <ul class="errors">
+              {% for error in form.password.errors %}
+                {{ error }}
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if register %}
+            {% if form.confirmPassword.errors %}
+              <ul class="errors">
+                {% for error in form.confirmPassword.errors %}
+                  {{ error }}
+                {% endfor %}
+              </ul>
+            {% endif %}
+            {% if form.recaptcha.errors %}
+              <ul class="errors">
+              {% for error in form.recaptcha.errors %}
+                {{ error }}
+              {% endfor %}
+              </ul>
+            {% endif %}
+          {% endif %}
+    </ul>
+  </form>
+</div>
+{% endblock %}

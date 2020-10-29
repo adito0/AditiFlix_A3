@@ -1,0 +1,53 @@
+<script type="text/javascript">
+
+    function loginpage(link) {
+        window.location=link;
+    }
+
+</script>
+
+{% extends 'layout.html' %}
+{% block content %}
+<div class="write">
+    {% if loggedin %}
+    <div class="form-wrapper">
+        <form method="POST" action={{redirect}}>
+            {{ form.csrf_token }} <!-- Need to include this token - Flask WTForms requires it. -->
+            <br>
+            <div class="form-field">{{form.rating.label}} </br>{{form.rating}}</div>
+            <div class="form-field">{{form.review.label}} </br>{{form.review(size = 100, placeholder="type your review",
+                class="textarea", cols="50", rows="6", wrap="hard")}}
+            </div>
+            <div style="display: flex;justify-content: center;">
+                {{ form.submit }}
+            </div>
+        </form>
+    </div>
+    {% if form.rating.errors %}
+    <ul class="errors">
+        {% for error in form.rating.errors %}
+        {{error}}
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if form.review.errors %}
+    <ul class="errors">
+        {% for error in form.rating.errors %}
+        {{error}}
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if error %}
+    {{error}}
+    {% endif %}
+    {% else %}
+    <div style="padding:20px;">
+        <h6>You need to log in to leave comments</h6>
+    </div>
+    <div style="display: flex;justify-content: center;">
+        <button class="nxt-btn" onclick="loginpage('{{login}}')">Leave this page</button>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}
