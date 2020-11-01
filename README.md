@@ -1,12 +1,16 @@
 # AditiFLIX Web Application
 
+## A3 Evaluation
+
+Database engine was setup in `__init__.py` in the AditiFlix_App folder. Furthermore, the database_repository was implemented and a database was populated from the CSV file. The ORM worked for movies but didn't work for other model classes. Movies are able to be seen in the Explore page.
+
+
 ## Description
 
 A Web application imitating Netflix that demonstrates use of Python's Flask framework. The application makes use of libraries such as the Jinja templating library and WTForms. Architectural design patterns and principles including Repository, Dependency Inversion and Single Responsibility have been used to design the application. The application uses Flask Blueprints to maintain a separation of concerns between application functions. Testing includes unit and end-to-end testing using the pytest tool. 
 
 NOTE 1: The application will take up to 10 mins to start up at first due to the 1000 API calls being made to OMDB. After that everything should be smooth.
 
-NOTE 2: A few bug fixes were committed after the due date but Martin has approved them and said they will not incur the 10% penalty. See email in the root folder :)
 ## Installation
 
 **Installation via requirements.txt**
@@ -44,16 +48,4 @@ The *AFLix_A2/.env* file contains variable settings. They are set with appropria
 * `RECAPTCHA_PUBLIC_KEY` : Secret public key used by Recaptcha
 * `RECAPTCHA_PRIVATE_KEY` : Secret private key used by Recaptcha
 
-## Testing
 
-Testing requires that file *AFLix_A2/tests/conftest.py* be edited to set the value of `TEST_DATA_PATH`. You should set this to the absolute path of the *AFLix_A2/tests/data* directory. 
-
-E.g. 
-
-`TEST_DATA_PATH = os.path.join('C:', os.sep, 'Users', 'aditi', 'Documents', 'Python dev', 'AFlix_A2', 'tests', 'data')`
-
-assigns TEST_DATA_PATH with the following value (the use of os.path.join and os.sep ensures use of the correct platform path separator):
-
-`C:\Users\aditi\Documents\python-dev\AFlix_A2\tests\data`
-
-You can then run tests from within PyCharm.

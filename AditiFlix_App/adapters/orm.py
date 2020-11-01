@@ -7,7 +7,7 @@ from sqlalchemy.orm import mapper, relationship
 
 from AditiFlix_App.domainmodel.user import User
 from AditiFlix_App.domainmodel.actor import Actor
-from AditiFlix_App.domainmodel.director import Director
+from AditiFlix_App.domainmodel.director import Director as dir
 from AditiFlix_App.domainmodel.movie import Movie
 from AditiFlix_App.domainmodel.review import Review
 from AditiFlix_App.domainmodel.genre import Genre
@@ -19,14 +19,14 @@ users = Table(
     Column('user_id', Integer, primary_key=True, autoincrement=True),
     Column('username', String(255), unique=True, nullable=False),
     Column('password', String(255), nullable=False),
-    Column('time_spent_watching_movies', Integer, nullable=False)
+    Column('time_spent_watching_movies', Integer)
 )
 
 movies = Table(
     'movies', metadata,
     Column('movie_id', Integer, primary_key=True, autoincrement=True),
     Column('title', String(1024), nullable=False),
-    Column('release_year', String(1024), primary_key=True, nullable=False),
+    Column('release_year', String(1024), nullable=False),
     Column('runtime_minutes', Integer, nullable=True),
     Column('description', String(1024), nullable=True),
     Column('votes', Integer, nullable=True),
@@ -51,7 +51,7 @@ directors = Table(
 genres = Table(
     'genres', metadata,
     Column('genre_id', Integer, primary_key=True, autoincrement=True),
-    Column('name', String(1024), unique=True, nullable=False),
+    Column('name', String(1024), nullable=False),
     Column('movie_id', ForeignKey('movies.movie_id')),
 )
 
@@ -64,29 +64,36 @@ reviews = Table(
     Column('movie_id', ForeignKey('movies.movie_id'))
 )
 
+watched_movies = Table(
+    'watched_movies', metadata,
+    Column('user_id', Integer, nullable=False),
+    Column('movie_id', Integer, nullable=False),
+)
+
+watch_list = Table(
+    'watch_list', metadata,
+    Column('user_id', Integer, nullable=False),
+    Column('movie_id', Integer, nullable=False),
+)
+
 
 def map_model_to_tables():
-    mapper(User, users, properties={
-        '__username': users.c.username,
-        '__password': users.c.password,
-        '__time_spent_watching_movies_minutes': users.c.time_spent_watching_movies
-    })
-
     mapper(Movie, movies, properties={
-        '__title': movies.c.title,
-        '__description': movies.c.description,
-        '__release_year': movies.c.release_year,
-        '__runtime_minutes': movies.c.runtime_minutes,
-        '__rating': movies.c.rating,
-        '__votes': movies.c.votes,
-        '__image': movies.c.image
+        'title': movies.c.title,
+        'description': movies.c.description,
+        'release_year': movies.c.release_year,
+        'runtime_minutes': movies.c.runtime_minutes,
+        'rating': movies.c.rating,
+        'votes': movies.c.votes,
+        'image': movies.c.image,
+        'director': relationship(dir, backref='_movie')
     })
 
     mapper(Actor, actors, properties={
         '__actor_full_name': actors.c.name,
     })
 
-    mapper(Director, directors, properties={
+    mapper(dir, directors, properties={
         '__director_full_name': directors.c.name
     })
 
@@ -98,4 +105,10 @@ def map_model_to_tables():
         '__rating': reviews.c.rating,
         '__review_text': reviews.c.text,
         '__timestamp': reviews.c.time
+    })
+
+    mapper(User, users, properties={
+        'username': users.c.username,
+        'password': users.c.password,
+        'time_spent_watching_movies_minutes': users.c.time_spent_watching_movies
     })

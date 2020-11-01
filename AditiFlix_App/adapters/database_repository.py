@@ -2,6 +2,8 @@ import csv
 import os
 from abc import ABC
 from typing import List
+
+from pip._vendor import requests
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.orm import scoped_session
@@ -28,9 +30,7 @@ class SqlAlchemyRepository(AbstractRepository, ABC):
         self._session_cm.reset_session()
 
     def add_user(self, user: User):
-        with self._session_cm as scm:
-            scm.session.add(user)
-            scm.commit()
+        pass
 
     def get_user(self, username) -> User:
         pass
@@ -48,8 +48,10 @@ class SqlAlchemyRepository(AbstractRepository, ABC):
     def get_movie(self, title: str, year: int) -> Movie:
         movie = None
         try:
-            movie = self._session_cm.session.query(Movie).filter(
-                Movie.__title == title and Movie.__release_year == year).one()
+            movie = self._session_cm.session.\
+                query(Movie)\
+                .filter(Movie.title == title, Movie.release_year == year)\
+                .one()
         except NoResultFound:
             # Ignore any exception and return None.
             pass
@@ -113,6 +115,11 @@ class SqlAlchemyRepository(AbstractRepository, ABC):
     def get_directors(self) -> List[Director]:
         pass
 
+    def get_movies_for_year(self, year: int) -> List[Movie]:
+        movies = self._session_cm.session.query(Movie).filter(Movie.release_year == year).all()
+        return movies
+
+
 
 def read_csv_file(filename: str):
     with open(filename, mode='r', encoding='utf-8-sig') as infile:
@@ -124,7 +131,6 @@ def read_csv_file(filename: str):
 
 
 def get_movies(data_path: str):
-    print("DATA: ", data_path)
     movie_records = list()
     for row in read_csv_file(data_path):
         movie_title = row['Title']
@@ -133,39 +139,69 @@ def get_movies(data_path: str):
         movie_description = row['Description'].strip()
         movie_votes = int(row['Votes']) if 'Votes' in row else None
         movie_rating = float(row['Rating']) if 'Rating' in row else None
+        movie_url = get_image(movie_title, movie_year)
         movie_records.append(
-            (movie_title, movie_year, movie_runtime_minutes, movie_description, movie_votes, movie_rating))
+            (movie_title, movie_year, movie_runtime_minutes, movie_description, movie_votes, movie_rating, movie_url))
     return movie_records
 
+def get_image(movie_title, movie_year):
+    token = "adea3d0d"
+    token = "40e73228"
+    movie_name = movie_title.replace(" ", "+")
+    url = "http://www.omdbapi.com/?apikey=" + token + "&t=" + movie_name.lower() + "&y=" + str(movie_year)
+    r = requests.get(url).json()
+    if r['Response'] == "True":
+        return r['Poster']
 
 def get_directors(data_path: str):
-    print("DATA: ", data_path)
     director_records = list()
-    count = 1
+    movie_count = 1
     for row in read_csv_file(data_path):
         director_name = row['Director'].strip()
-        director_records.append((director_name, count))
-        count += 1
-    print(director_records)
+        director_records.append((director_name, movie_count))
+        movie_count += 1
     return director_records
 
 
-def populate(engine: Engine, data_path: str):
-    print(data_path)
-    conn = engine.raw_connection()
-    cursor = conn.cursor()
+def get_actors(data_path: str):
+    actor_records = list()
+    movie_count = 1
+    for row in read_csv_file(data_path):
+        actors = row['Actors'].split(",")
+        for actor in actors:
+            actor_name = actor.strip()
+            actor_records.append((actor_name, movie_count))
+        movie_count += 1
+    return actor_records
 
-    movie_records = get_movies(os.path.join(os.getcwd(), "test", "data", data_path))
+
+def get_genres(data_path: str):
+    genre_records = list()
+    movie_count = 1
+    for row in read_csv_file(data_path):
+        genres = row['Genre'].split(",")
+        for genre in genres:
+            stripped_genre = genre.strip()
+            genre_records.append((stripped_genre, movie_count))
+        movie_count += 1
+
+    return genre_records
+
+def populate_from_movie_csv(cursor, data_path: str):
+    csv_path = os.path.join(os.getcwd(), "test", "data", data_path)
+
+    movie_records = get_movies(csv_path)
 
     insert_movie = (
-        "INSERT OR REPLACE INTO movies (title, release_year, runtime_minutes, description, votes, rating)"
-        "VALUES (?, ?, ?, ?, ?, ?)"
+        "INSERT OR REPLACE INTO movies (title, release_year, runtime_minutes, description, votes, rating, image)"
+        "VALUES (?, ?, ?, ?, ?, ?, ?)"
     )
 
     cursor.executemany(insert_movie, movie_records)
 
-    print("Movies done!")
-    director_records = get_directors(os.path.join(os.getcwd(), "test", "data", data_path))
+    print("Movies populated!")
+
+    director_records = get_directors(csv_path)
 
     insert_director = (
         "INSERT OR REPLACE INTO directors (name, movie_id)"
@@ -174,6 +210,50 @@ def populate(engine: Engine, data_path: str):
 
     cursor.executemany(insert_director, director_records)
 
+    print("Directors populated!")
+
+    actor_records = get_actors(csv_path)
+
+    insert_actor = (
+        "INSERT OR REPLACE INTO actors (name, movie_id)"
+        "VALUES (?, ?)"
+    )
+
+    cursor.executemany(insert_actor, actor_records)
+
+    print("Actors populated!")
+
+    genre_records = get_genres(csv_path)
+
+    insert_genre = (
+        "INSERT OR REPLACE INTO genres (name, movie_id)"
+        "VALUES (?, ?)"
+    )
+
+    cursor.executemany(insert_genre, genre_records)
+
+    print("Genres populated!")
+
+
+def get_users(data_path: str):
+    genre_records = list()
+    movie_count = 1
+    for row in read_csv_file(data_path):
+        genres = row['Genre'].split(",")
+        for genre in genres:
+            stripped_genre = genre.strip()
+            genre_records.append((stripped_genre, movie_count))
+        movie_count += 1
+
+    return genre_records
+
+
+
+
+def populate(engine: Engine, data_path: str):
+    conn = engine.raw_connection()
+    cursor = conn.cursor()
+    populate_from_movie_csv(cursor, data_path)
     conn.commit()
     conn.close()
 

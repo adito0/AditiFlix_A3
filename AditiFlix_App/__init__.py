@@ -32,7 +32,7 @@ def create_app(test_config=None):
     if app.config['REPOSITORY'] == 'memory':
         # Create the MemoryRepository instance for a memory-based repository.
         repo.repo_instance = MemoryRepository()
-        populate(data_path, repo.repo_instance, 'Data13Movies.csv')
+        populate(data_path, repo.repo_instance, 'Data1000Movies.csv')
 
     if app.config['REPOSITORY'] == 'database':
         database_uri = app.config['SQLALCHEMY_DATABASE_URI']
@@ -48,7 +48,7 @@ def create_app(test_config=None):
         # Create the database session factory using sessionmaker (this has to be done once, in a global manner)
         session_factory = sessionmaker(autocommit=False, autoflush=True, bind=database_engine)
         repo.repo_instance = database_repository.SqlAlchemyRepository(session_factory)
-        database_repository.populate(database_engine, 'Data13Movies.csv')
+        database_repository.populate(database_engine, 'Data1000Movies.csv')
 
     # Build the application - these steps require an application context.
     with app.app_context():

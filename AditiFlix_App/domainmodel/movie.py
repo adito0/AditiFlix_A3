@@ -182,9 +182,10 @@ class Movie:
         return f"<Movie {self.title}, {self.release_year}>"
 
     def __eq__(self, other):
+        print(self, other)
         if not isinstance(other, Movie):
             return False
-        return other.title == self.__title and other.release_year == self.__release_year
+        return other.title == self.title and other.release_year == self.release_year
 
     def __lt__(self, other):
         if self.__title is None or other.title is None:

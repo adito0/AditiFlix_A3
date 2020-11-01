@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 import AditiFlix_App.movies.services as services
 import AditiFlix_App.adapters.movie_repository as repo
+from AditiFlix_App.domainmodel.movie import Movie
 
 movie_blueprint = Blueprint(
-    'movie_bp', __name__,url_prefix='/movies')
+    'movie_bp', __name__, url_prefix='/movies')
+
 
 @movie_blueprint.route('/browse', methods=['GET'])
 def browse():
@@ -15,17 +17,17 @@ def browse():
         username = session['username']
         print(request.args.get('watched'), type(request.args.get('watched')))
         user = services.get_user(username, repo.repo_instance)
-        if(request.args.get('watched') == "True"):
+        if (request.args.get('watched') == "True"):
             user.watch_movie(movie)
         if (request.args.get('watchlisted') == "True"):
             user.watchlist_movie(movie)
-        elif(request.args.get('watchlisted') == "False"):
+        elif (request.args.get('watchlisted') == "False"):
             user.remove_movie(movie)
         if movie in user.watched_movies:
             watched = True
         if movie in user.watchlist:
             watchlisted = True
-        loggedin=True
+        loggedin = True
     except:
         loggedin = False
         print("not logged in")
@@ -41,6 +43,7 @@ def browse():
         watched=watched,
         watchlisted=watchlisted
     )
+
 
 @movie_blueprint.route('/explore', methods=['GET'])
 def explore():
@@ -71,6 +74,7 @@ def explore():
         this_url=url_for('movie_bp.explore')
     )
 
+
 @movie_blueprint.route('/search', methods=['GET'])
 def search():
     search = request.args.get('query')
@@ -79,7 +83,7 @@ def search():
         value = "ALL"
     else:
         search = search.split("@")
-        for i in range(len(search)-1,-1,-1):
+        for i in range(len(search) - 1, -1, -1):
             if search[i] == "":
                 search.pop(i)
         search = ", ".join(search)
